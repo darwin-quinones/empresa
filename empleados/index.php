@@ -42,6 +42,10 @@ switch($action){
         break;
     case "btn_delete":
         echo "Clicked delete";
+        $statement = $conn->prepare("DELETE FROM empleados WHERE ID=:ID");
+        $statement->bindParam(":ID", $id);
+        $statement->execute();
+        header("Location: index.php");
         break;
     case "btn_cancel" :
         echo "Clicked cancel";
@@ -116,6 +120,7 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
                                 <input type="hidden" name="photo" value="<?php echo $employee["PHOTO"]?>">
 
                                 <input type="submit" value="Select" name="action">
+                                <button type="submit" value="btn_delete" name="action" id="btn_delete" class="btn btn-danger">Delete</button>
                             </form>
 
                         </td>
