@@ -28,8 +28,17 @@ switch($action){
         echo "Clicked add";
         break;
     case "btn_modify":
-        $statement = $conn->prepare("UPDATE empleados SET NAME:NAME, ");
         echo "Clicked modify";
+        $statement = $conn->prepare("UPDATE empleados SET NAME=:NAME, LASTNAME_P=:LASTNAME_P, LASTNAME_M=:LASTNAME_M, EMAIL=:EMAIL, PHOTO=:PHOTO WHERE ID=:ID");
+        $statement->bindParam(":NAME", $name);
+        $statement->bindParam(":LASTNAME_P", $lastname_p);
+        $statement->bindParam(":LASTNAME_M", $lastname_m);
+        $statement->bindParam(":EMAIL", $email);
+        $statement->bindParam(":PHOTO", $photo);
+        $statement->bindParam(":ID", $id);
+        $statement->execute();
+        
+        header("Location: index.php");
         break;
     case "btn_delete":
         echo "Clicked delete";
