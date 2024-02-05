@@ -28,6 +28,7 @@ switch($action){
         echo "Clicked add";
         break;
     case "btn_modify":
+        $statement = $conn->prepare("UPDATE empleados SET NAME:NAME, ");
         echo "Clicked modify";
         break;
     case "btn_delete":
@@ -38,6 +39,12 @@ switch($action){
         break;
 
 }
+
+// retrieve data from database
+$statement = $conn->prepare("SELECT * FROM empleados");
+$statement->execute();
+$employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
+// print_r($employees_list);
 ?>
 
 
@@ -54,7 +61,7 @@ switch($action){
 </head>
 
 <body>
-    <h1>Hello, world!</h1>
+    <h1>Company system</h1>
     <div class="container">
         <form action="" method="post" enctype="multipart/form-data">
             <label for="">ID</label>
@@ -75,6 +82,39 @@ switch($action){
             <button type="submit" value="btn_cancel" name="action" id="btn_cancel" class="btn btn-secondary">Cancel</button>
 
         </form>
+        <div class="row">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Full name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <?php foreach($employees_list as $employee) { ?>
+                    <tr>
+                        <td><?php echo $employee["PHOTO"]?></td>
+                        <td><?php echo $employee["NAME"] ." ".  $employee["LASTNAME_P"] ." ". $employee["LASTNAME_M"]?> </td>
+                        <td><?php echo $employee["EMAIL"]?></td>
+                        <td>
+                            <form action="" method="post">
+                                <input type="hidden" name="id" value="<?php echo $employee["ID"]?>">
+                                <input type="hidden" name="name" value="<?php echo $employee["NAME"]?>">
+                                <input type="hidden" name="lastname_p" value="<?php echo $employee["LASTNAME_P"]?>">
+                                <input type="hidden" name="lastname_m" value="<?php echo $employee["LASTNAME_M"]?>">
+                                <input type="hidden" name="email" value="<?php echo $employee["EMAIL"]?>">
+                                <input type="hidden" name="photo" value="<?php echo $employee["PHOTO"]?>">
+
+                                <input type="submit" value="Select" name="action">
+                            </form>
+
+                        </td>
+                    </tr>
+                <?php } ?>
+            </table>
+
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
