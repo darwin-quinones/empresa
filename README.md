@@ -34,14 +34,6 @@ https://github.com/darwin-quinones/empresa.git
 
 ```
 
-After cloning, run the command below to install dependencies
-
-```bash
-
-pip install -r requirements.txt
-
-```
-
 ## Technologies Used
 
 
