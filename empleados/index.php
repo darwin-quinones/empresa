@@ -9,12 +9,22 @@ $name = isset($_POST["name"]) ? $_POST["name"] : "";
 $lastname_p = isset($_POST["lastname_p"]) ? $_POST["lastname_p"] : "";
 $lastname_m = isset($_POST['lastname_m']) ? $_POST["lastname_m"] : "" ;
 $email = isset($_POST['email']) ? $_POST['email'] : "" ;
-$photo = isset($_POST['photo']) ? $_POST['photo'] : "" ;
+$photo = isset($_FILES['photo']['name']) ? $_FILES['photo']['name'] : "" ;
 
 $action = (isset($_POST["action"])) ? $_POST["action"] : "";
 
 switch($action){
     case "btn_add":
+
+        $date = new DateTime();
+
+        // if no img, then we save and img name by default
+        $photo_name = ($photo != '') ? $date->getTimestamp()."_".$_FILES['photo']['name']: 'img-defaul.png';
+        $temporary_photo = $_FILES['photo']['tmp_name'];
+        
+        if($temporary_photo != ''){
+            move_uploaded_file($temporary_photo, "../imagenes/".$photo_name);
+        }
         // inser info in DB
         $statement = $conn->prepare("INSERT INTO empleados(NAME, LASTNAME_P, LASTNAME_M, EMAIL, PHOTO) 
         VALUES (:NAME, :LASTNAME_P, :LASTNAME_M, :EMAIL, :PHOTO)");
@@ -22,7 +32,7 @@ switch($action){
         $statement->bindParam(":LASTNAME_P", $lastname_p);
         $statement->bindParam(":LASTNAME_M", $lastname_m);
         $statement->bindParam(":EMAIL", $email);
-        $statement->bindParam(":PHOTO", $photo);
+        $statement->bindParam(":PHOTO", $photo_name);
         $statement->execute();
 
         echo "Clicked add";
@@ -34,7 +44,7 @@ switch($action){
         $statement->bindParam(":LASTNAME_P", $lastname_p);
         $statement->bindParam(":LASTNAME_M", $lastname_m);
         $statement->bindParam(":EMAIL", $email);
-        $statement->bindParam(":PHOTO", $photo);
+        $statement->bindParam(":PHOTO", $photo_name);
         $statement->bindParam(":ID", $id);
         $statement->execute();
         
@@ -88,7 +98,8 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
             <label for="">Email</label>
             <input type="text" name="email"  value="<?php echo $email; ?>" placeholder="Email" id="email" required="required">
             <label for="">Photo</label>
-            <input type="text" name="photo"  value="<?php echo $photo; ?>" placeholder="Photo" id="photo" required="required">
+            <input type="file" accept="image/*" name="photo"  value="<?php echo $photo; ?>" placeholder="Photo" id="photo">
+            
             <button type="submit" value="btn_add" name="action" id="btn_add" class="btn btn-primary">Add</button>
             <button type="submit" value="btn_modify" name="action" id="btn_modify" class="btn btn-warning">Modify</button>
             <button type="submit" value="btn_delete" name="action" id="btn_delete" class="btn btn-danger">Delete</button>
@@ -107,11 +118,11 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
                 </thead>
                 <?php foreach($employees_list as $employee) { ?>
                     <tr>
-                        <td><?php echo $employee["PHOTO"]?></td>
+                        <td><img class="img-thumbnail" width="100px" height="100px" src="../imagenes/<?php echo $employee["PHOTO"]?>" alt="user profile image"></td>
                         <td><?php echo $employee["NAME"] ." ".  $employee["LASTNAME_P"] ." ". $employee["LASTNAME_M"]?> </td>
                         <td><?php echo $employee["EMAIL"]?></td>
                         <td>
-                            <form action="" method="post">
+                            <form action="" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="id" value="<?php echo $employee["ID"]?>">
                                 <input type="hidden" name="name" value="<?php echo $employee["NAME"]?>">
                                 <input type="hidden" name="lastname_p" value="<?php echo $employee["LASTNAME_P"]?>">
