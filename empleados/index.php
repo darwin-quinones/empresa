@@ -1,5 +1,6 @@
 <?php
 include('../conexion/conexion.php');
+include('../consts.php');
 
 // print_r($_POST);
 // echo $_POST['name'];
@@ -15,11 +16,9 @@ $action = (isset($_POST["action"])) ? $_POST["action"] : "";
 
 switch($action){
     case "btn_add":
-
         $date = new DateTime();
-
-        // if no img, then we save and img name by default
-        $photo_name = ($photo != '') ? $date->getTimestamp()."_".$_FILES['photo']['name']: 'img-defaul.png';
+        // if no img, then we save an img name by default
+        $photo_name = ($photo != '') ? $date->getTimestamp()."_".$_FILES['photo']['name']: IMG_DEFAULT;
         $temporary_photo = $_FILES['photo']['tmp_name'];
         
         if($temporary_photo != ''){
@@ -34,24 +33,66 @@ switch($action){
         $statement->bindParam(":EMAIL", $email);
         $statement->bindParam(":PHOTO", $photo_name);
         $statement->execute();
-
-        echo "Clicked add";
+        header("Location: index.php");
         break;
     case "btn_modify":
-        echo "Clicked modify";
-        $statement = $conn->prepare("UPDATE empleados SET NAME=:NAME, LASTNAME_P=:LASTNAME_P, LASTNAME_M=:LASTNAME_M, EMAIL=:EMAIL, PHOTO=:PHOTO WHERE ID=:ID");
+        $statement = $conn->prepare("UPDATE empleados SET NAME=:NAME, LASTNAME_P=:LASTNAME_P, LASTNAME_M=:LASTNAME_M, EMAIL=:EMAIL WHERE ID=:ID");
         $statement->bindParam(":NAME", $name);
         $statement->bindParam(":LASTNAME_P", $lastname_p);
         $statement->bindParam(":LASTNAME_M", $lastname_m);
         $statement->bindParam(":EMAIL", $email);
-        $statement->bindParam(":PHOTO", $photo_name);
+        //$statement->bindParam(":PHOTO", $photo_name);
         $statement->bindParam(":ID", $id);
         $statement->execute();
+
+        // Update photo
+        $date = new DateTime();
+        // if no img, then we save an img name by default
+        $photo_name = ($photo != '') ? $date->getTimestamp()."_".$_FILES['photo']['name']: IMG_DEFAULT;
+        $temporary_photo = $_FILES['photo']['tmp_name'];
         
+        if($temporary_photo != ''){
+            // move new photo
+            move_uploaded_file($temporary_photo, "../imagenes/".$photo_name);
+            
+            // retrieve current photo to delete
+            $statement = $conn->prepare("SELECT PHOTO FROM empleados WHERE ID=:ID");
+            $statement->bindParam(":ID", $id);
+            $statement->execute();
+            $employee = $statement->fetch(PDO::FETCH_LAZY);
+    
+            if(isset($employee['PHOTO'])){
+                // if the user has the default img then we don't delete it
+                if($employee['PHOTO'] != IMG_DEFAULT){
+                    if(file_exists("../imagenes/".$employee['PHOTO'])){
+                        unlink("../imagenes/".$employee['PHOTO']);
+                    }
+                }
+            }
+
+            $statement = $conn->prepare("UPDATE empleados SET PHOTO = :PHOTO WHERE ID = :ID");
+            $statement->bindParam("PHOTO", $photo_name);
+            $statement->bindParam("ID", $id);
+            $statement->execute();
+        }
         header("Location: index.php");
         break;
     case "btn_delete":
-        echo "Clicked delete";
+
+        $statement = $conn->prepare("SELECT PHOTO FROM empleados WHERE ID=:ID");
+        $statement->bindParam(":ID", $id);
+        $statement->execute();
+        $employee = $statement->fetch(PDO::FETCH_LAZY);
+
+        if(isset($employee['PHOTO'])){
+            // if the user has the default img then we don't delete it
+            if($employee['PHOTO'] != IMG_DEFAULT){
+                if(file_exists("../imagenes/".$employee['PHOTO'])){
+                    unlink("../imagenes/".$employee['PHOTO']);
+                }
+            }
+        }
+
         $statement = $conn->prepare("DELETE FROM empleados WHERE ID=:ID");
         $statement->bindParam(":ID", $id);
         $statement->execute();
@@ -87,8 +128,7 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
     <h1>Company system</h1>
     <div class="container">
         <form action="" method="post" enctype="multipart/form-data">
-            <label for="">ID</label>
-            <input type="text" name="id" value="<?php echo $id; ?>" placeholder="ID" id="id" required="required">
+            <input type="hidden" name="id" value="<?php echo $id; ?>" placeholder="ID" id="id" required="required">
             <label for="">Name</label>
             <input type="text" name="name"  value="<?php echo $name; ?>" placeholder="Name" id="name" required="required">
             <label for="">Lastname</label>
