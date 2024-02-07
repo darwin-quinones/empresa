@@ -14,6 +14,11 @@ $photo = isset($_FILES['photo']['name']) ? $_FILES['photo']['name'] : "";
 
 $action = (isset($_POST["action"])) ? $_POST["action"] : "";
 
+// modal actions 
+$add_action = "";
+$modify_action = $delete_action = $cancel_action = "disabled";
+$show_modal = false;
+
 switch ($action) {
     case "btn_add":
         $date = new DateTime();
@@ -61,12 +66,10 @@ switch ($action) {
             $statement->execute();
             $employee = $statement->fetch(PDO::FETCH_LAZY);
 
-            if (isset($employee['PHOTO'])) {
+            if (isset($employee['PHOTO']) && $employee['PHOTO'] != IMG_DEFAULT) {
                 // if the user has the default img then we don't delete it
-                if ($employee['PHOTO'] != IMG_DEFAULT) {
-                    if (file_exists("../imagenes/" . $employee['PHOTO'])) {
-                        unlink("../imagenes/" . $employee['PHOTO']);
-                    }
+                if (file_exists("../imagenes/" . $employee['PHOTO'])) {
+                    unlink("../imagenes/" . $employee['PHOTO']);
                 }
             }
 
@@ -84,12 +87,10 @@ switch ($action) {
         $statement->execute();
         $employee = $statement->fetch(PDO::FETCH_LAZY);
 
-        if (isset($employee['PHOTO'])) {
+        if (isset($employee['PHOTO']) && $employee['PHOTO'] != IMG_DEFAULT) {
             // if the user has the default img then we don't delete it
-            if ($employee['PHOTO'] != IMG_DEFAULT) {
-                if (file_exists("../imagenes/" . $employee['PHOTO'])) {
-                    unlink("../imagenes/" . $employee['PHOTO']);
-                }
+            if (file_exists("../imagenes/" . $employee['PHOTO'])) {
+                unlink("../imagenes/" . $employee['PHOTO']);
             }
         }
 
@@ -99,7 +100,23 @@ switch ($action) {
         header("Location: index.php");
         break;
     case "btn_cancel":
-        echo "Clicked cancel";
+        header("Location: index.php");
+        break;
+    case "Select":
+        $add_action = "disabled";
+        $modify_action = $delete_action = $cancel_action = "";
+        $show_modal = true;
+
+        $statement = $conn->prepare("SELECT * FROM empleados WHERE ID=:ID");
+        $statement->bindParam(":ID", $id);
+        $statement->execute();
+        $employee = $statement->fetch(PDO::FETCH_LAZY);
+
+        $name = $employee['NAME'];
+        $lastname_p = $employee['LASTNAME_P'];
+        $lastname_m = $employee['LASTNAME_M'];
+        $email = $employee['EMAIL'];
+        $photo = $employee['PHOTO'];
         break;
 }
 
@@ -108,6 +125,8 @@ $statement = $conn->prepare("SELECT * FROM empleados");
 $statement->execute();
 $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
 // print_r($employees_list);
+
+
 ?>
 
 
@@ -120,6 +139,11 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CRUD with PHP and MySQL</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -161,15 +185,21 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
                                 </div>
                                 <div class="form-group col-md-12">
                                     <label for="">Photo:</label>
-                                    <input type="file" class="form-control" accept="image/*" name="photo" value="<?php echo $photo; ?>" placeholder="Photo" id="photo"><br>
+                                    <br>
+                                    <?php if($photo != '') {?>
+                                        <img class="img-thumbnail rounded mx-outo d-block" src="../imagenes/<?php echo $photo ?>" width="100px" alt="user profile img">
+                                    <?php }?>
+                                    <br>
+                                    <br>
+                                    <input type="file" class="form-control" accept="image/*" name="photo" placeholder="Photo" id="photo"><br>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" value="btn_add" name="action" id="btn_add" class="btn btn-success">Add</button>
-                            <button type="submit" value="btn_modify" name="action" id="btn_modify" class="btn btn-warning">Modify</button>
-                            <button type="submit" value="btn_delete" name="action" id="btn_delete" class="btn btn-danger">Delete</button>
-                            <button type="submit" value="btn_cancel" name="action" id="btn_cancel" class="btn btn-primary">Cancel</button>
+                            <button type="submit" value="btn_add" <?php echo $add_action ?> name="action" id="btn_add" class="btn btn-success">Add</button>
+                            <button type="submit" value="btn_modify" <?php echo $modify_action ?> name="action" id="btn_modify" class="btn btn-warning">Modify</button>
+                            <button type="submit" value="btn_delete" <?php echo $delete_action ?> name="action" id="btn_delete" class="btn btn-danger">Delete</button>
+                            <button type="submit" value="btn_cancel" <?php echo $cancel_action ?> name="action" id="btn_cancel" class="btn btn-primary">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -194,24 +224,26 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
                         <td>
                             <form action="" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="id" value="<?php echo $employee["ID"] ?>">
-                                <input type="hidden" name="name" value="<?php echo $employee["NAME"] ?>">
-                                <input type="hidden" name="lastname_p" value="<?php echo $employee["LASTNAME_P"] ?>">
-                                <input type="hidden" name="lastname_m" value="<?php echo $employee["LASTNAME_M"] ?>">
-                                <input type="hidden" name="email" value="<?php echo $employee["EMAIL"] ?>">
-                                <input type="hidden" name="photo" value="<?php echo $employee["PHOTO"] ?>">
-
-                                <input type="submit" value="Select" name="action">
+                                <input type="submit" value="Select" id="btn_select" class="btn btn-info" name="action">
                                 <button type="submit" value="btn_delete" name="action" id="btn_delete" class="btn btn-danger">Delete</button>
                             </form>
-
                         </td>
                     </tr>
                 <?php } ?>
             </table>
-
         </div>
+        <?php if ($show_modal) { ?>
+            <script>
+                var myModalEl = document.querySelector('#exampleModal')
+                var modal = bootstrap.Modal.getOrCreateInstance(myModalEl)
+                modal.show()
+            </script>
+        <?php } ?>
+
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+
+
 </body>
 
 </html>
