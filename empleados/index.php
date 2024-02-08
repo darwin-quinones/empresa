@@ -67,9 +67,10 @@ require './employees.php';
                                     </div>
                                 </div>
                                 <div class="form-group col-md-12">
-                                    <label for="">Photo:</label>
-                                    <br>
+
                                     <?php if ($photo != '') { ?>
+                                        <label for="">Photo:</label>
+                                        <br>
                                         <center><img class="img-thumbnail rounded mx-outo d-block" src="../imagenes/<?php echo $photo ?>" width="200px" alt="user profile img"></center>
                                     <?php } ?>
                                     <br>

@@ -36,13 +36,12 @@ switch ($action) {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error['email'] = 'Please write email';
         }
-
-        if (count($error) > 0) {
-            $show_modal = true;
-            break;
+        if(isset($error)){
+            if (count($error) > 0) {
+                $show_modal = true;
+                break;
+            }
         }
-
-
 
         $date = new DateTime();
         // if no img, then we save an img name by default
