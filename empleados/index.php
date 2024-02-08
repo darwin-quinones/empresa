@@ -1,4 +1,4 @@
-<?php 
+<?php
 require './employees.php';
 ?>
 
@@ -53,7 +53,7 @@ require './employees.php';
                                 </div><br>
                                 <div class="form-group col-md-4">
                                     <label for="">M. lastname:</label>
-                                    <input type="text" class="form-control <?php echo (isset($error['lastname_m'])) ? "is-invalid" : "" ?>" name="lastname_m" value="<?php echo $lastname_m; ?>" placeholder="M. lastname " id="lastname_m" >
+                                    <input type="text" class="form-control <?php echo (isset($error['lastname_m'])) ? "is-invalid" : "" ?>" name="lastname_m" value="<?php echo $lastname_m; ?>" placeholder="M. lastname " id="lastname_m">
                                     <div class="invalid-feedback">
                                         <?php echo (isset($error['lastname_m'])) ? $error['lastname_m'] : "" ?>
                                     </div>
@@ -81,7 +81,7 @@ require './employees.php';
                         <div class="modal-footer">
                             <button type="submit" value="btn_add" <?php echo $add_action ?> name="action" id="btn_add" class="btn btn-success">Add</button>
                             <button type="submit" value="btn_modify" <?php echo $modify_action ?> name="action" id="btn_modify" class="btn btn-warning">Modify</button>
-                            <button type="submit" value="btn_delete" <?php echo $delete_action ?> name="action" id="btn_delete" class="btn btn-danger">Delete</button>
+                            <button type="submit" value="btn_delete" onclick="return Confirm('Do you really want to delete this item?')" <?php echo $delete_action ?> name="action" id="btn_delete" class="btn btn-danger">Delete</button>
                             <button type="submit" value="btn_cancel" <?php echo $cancel_action ?> name="action" id="btn_cancel" class="btn btn-primary">Cancel</button>
                         </div>
                     </div>
@@ -112,7 +112,7 @@ require './employees.php';
                             <form action="" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="id" value="<?php echo $employee["ID"] ?>">
                                 <input type="submit" value="Select" id="btn_select" class="btn btn-info" name="action">
-                                <button type="submit" value="btn_delete" name="action" id="btn_delete" class="btn btn-danger">Delete</button>
+                                <button onclick="return Confirm('Do you really want to delete this item?')" type="submit" value="btn_delete" name="action" id="btn_delete" class="btn btn-danger">Delete</button>
                             </form>
                         </td>
                     </tr>
@@ -129,7 +129,11 @@ require './employees.php';
 
     </div>
 
-
+    <script>
+        function Confirm(message) {
+            return (confirm(message)) ? true : false
+        }
+    </script>
 
 </body>
 
