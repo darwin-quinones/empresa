@@ -21,6 +21,29 @@ $show_modal = false;
 
 switch ($action) {
     case "btn_add":
+
+        // server side validations
+
+        if ($name == "" || (!preg_match("/^[a-zA-Zñáéíóú ]*$/",$name))) {
+            $error['name'] = 'Please write name';
+        }
+        if ($lastname_p == "" ) {
+            $error['lastname_p'] = 'Please write lastname';
+        }
+        if ($lastname_m == "") {
+            $error['lastname_m'] = 'Please write M. lastname';
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error['email'] = 'Please write email';
+        }
+
+        if (count($error) > 0) {
+            $show_modal = true;
+            break;
+        }
+
+
+
         $date = new DateTime();
         // if no img, then we save an img name by default
         $photo_name = ($photo != '') ? $date->getTimestamp() . "_" . $_FILES['photo']['name'] : IMG_DEFAULT;
@@ -147,14 +170,13 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body>
-    <h1>Company system</h1>
-    <div class="container">
-        <form action="" method="post" enctype="multipart/form-data">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                Add register
-            </button>
 
+    <div class="container">
+        <br>
+        <center>
+            <h1>Company System - CRUD with PHP and MySQL</h1>
+        </center>
+        <form action="" method="post" enctype="multipart/form-data">
             <!-- Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-md">
@@ -168,27 +190,39 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
                                 <input type="hidden" class="" name="id" value="<?php echo $id; ?>" placeholder="ID" id="id" required="required">
                                 <div class="form-group col-4">
                                     <label for="">Name(s):</label>
-                                    <input type="text" class="form-control" name="name" value="<?php echo $name; ?>" placeholder="Name" id="name" required="required"><br>
-                                </div>
+                                    <input type="text" class="form-control <?php echo (isset($error['name'])) ? "is-invalid" : "" ?> " name="name" value="<?php echo $name; ?>" placeholder="Name" id="name">
+                                    <div class="invalid-feedback">
+                                        <?php echo (isset($error['name'])) ? $error['name'] : "" ?>
+                                    </div>
+                                </div><br>
                                 <div class="form-group col-4">
                                     <label for="">Lastname:</label>
-                                    <input type="text" class="form-control" name="lastname_p" value="<?php echo $lastname_p; ?>" placeholder="Lastname" id="lastname_p" required="required"><br>
-                                </div>
+                                    <input type="text" class="form-control <?php echo (isset($error['lastname_p'])) ? "is-invalid" : "" ?>" name="lastname_p" value="<?php echo $lastname_p; ?>" placeholder="Lastname" id="lastname_p">
+                                    <div class="invalid-feedback">
+                                        <?php echo (isset($error['lastname_p'])) ? $error['lastname_p'] : "" ?>
+                                    </div>
+                                </div><br>
                                 <div class="form-group col-md-4">
                                     <label for="">M. lastname:</label>
-                                    <input type="text" class="form-control" name="lastname_m" value="<?php echo $lastname_m; ?>" placeholder="M. lastname " id="lastname_m" required="required"><br>
+                                    <input type="text" class="form-control <?php echo (isset($error['lastname_m'])) ? "is-invalid" : "" ?>" name="lastname_m" value="<?php echo $lastname_m; ?>" placeholder="M. lastname " id="lastname_m" >
+                                    <div class="invalid-feedback">
+                                        <?php echo (isset($error['lastname_m'])) ? $error['lastname_m'] : "" ?>
+                                    </div>
                                 </div>
 
                                 <div class="form-group col-md-12">
                                     <label for="">Email:</label>
-                                    <input type="text" class="form-control" name="email" value="<?php echo $email; ?>" placeholder="Email" id="email" required="required"><br>
+                                    <input type="text" class="form-control <?php echo (isset($error['email'])) ? "is-invalid" : "" ?>" name="email" value="<?php echo $email; ?>" placeholder="Email" id="email">
+                                    <div class="invalid-feedback">
+                                        <?php echo (isset($error['email'])) ? $error['email'] : "" ?>
+                                    </div>
                                 </div>
                                 <div class="form-group col-md-12">
                                     <label for="">Photo:</label>
                                     <br>
-                                    <?php if($photo != '') {?>
-                                        <img class="img-thumbnail rounded mx-outo d-block" src="../imagenes/<?php echo $photo ?>" width="100px" alt="user profile img">
-                                    <?php }?>
+                                    <?php if ($photo != '') { ?>
+                                        <center><img class="img-thumbnail rounded mx-outo d-block" src="../imagenes/<?php echo $photo ?>" width="200px" alt="user profile img"></center>
+                                    <?php } ?>
                                     <br>
                                     <br>
                                     <input type="file" class="form-control" accept="image/*" name="photo" placeholder="Photo" id="photo"><br>
@@ -205,7 +239,11 @@ $employees_list = $statement->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
         </form>
-
+        <br>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Add register
+        </button><br><br>
         <div class="row">
             <table>
                 <thead>
